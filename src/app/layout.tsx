@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { FluidCanvas } from "@/components/Fluid/FluidCanvas";
+import { GlobalFluidLayer } from "@/components/Fluid/GlobalFluidLayer";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,7 +29,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <FluidCanvas />
+        <GlobalFluidLayer />
         <div className="ui-layer flex min-h-full flex-col">{children}</div>
       </body>
     </html>

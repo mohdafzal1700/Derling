@@ -34,8 +34,8 @@ export function FluidScene() {
     return createDisplayMaterial(simulation.getDyeTexture(), width, height);
   }, [simulation]);
 
-  useEffect(() => simulation.dispose, [simulation]);
-  useEffect(() => material.dispose, [material]);
+  useEffect(() => () => simulation.dispose(), [simulation]);
+  useEffect(() => () => material.dispose(), [material]);
 
   useEffect(() => {
     simulation.resize(Math.max(1, size.width), Math.max(1, size.height));
