@@ -58,4 +58,12 @@ export const HERO_SHADER_DEFAULTS = {
   /** How much the blurred backdrop is darkened/desaturated, purely so it
    * reads as an ambient frame and never competes with the true-color photo. */
   backdropDarken: 0.45,
+  /** Amplifies the dye-gradient-derived normal into a visible bend. Lower
+   * than the ambient milk layer's (14) so the liquid reads as a soft bulge
+   * rather than a hard lens rim. */
+  normalGain: 10,
+  /** Width (in dye texels) of the central-difference sample used to derive
+   * that normal. Wider = smoother, lower-frequency surface slope; 1 texel
+   * reacts to a splat's sharp edge and reads as a lens boundary. */
+  normalSampleScale: 2,
 };

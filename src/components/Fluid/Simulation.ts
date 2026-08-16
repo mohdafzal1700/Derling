@@ -8,6 +8,7 @@ import pressureFrag from "./Shaders/pressure.glsl";
 import gradientFrag from "./Shaders/gradient.glsl";
 import clearFrag from "./Shaders/clear.glsl";
 import splatFrag from "./Shaders/splat.glsl";
+import diffuseFrag from "./Shaders/diffuse.glsl";
 import ambientFrag from "./Shaders/ambient.glsl";
 import fillFrag from "./Shaders/fill.glsl";
 import dyeNoiseFrag from "./Shaders/dyeNoise.glsl";
@@ -23,18 +24,19 @@ export const DEFAULT_SIMULATION_CONFIG: SimulationConfig = {
   splatRadius: 0.006,
   ambientAmplitude: 0.05,
   ambientScale: 3.0,
+  viscosity: 0,
+  diffusionIterations: 0,
+  // Full-screen baseline density so the liquid always covers the entire
+  // viewport instead of appearing as isolated blobs over an empty field.
+  dyeBaseline: 0.4,
+  // Fraction of the way back toward dyeBaseline the field relaxes each
+  // frame — settles interaction bumps without ever draining to black.
+  dyeRelaxRate: 0.035,
+  // Amplitude/scale of the perpetual low-frequency shimmer layered on top of
+  // the baseline so the surface always has visible motion, even at rest.
+  dyeShimmerAmplitude: 0.07,
+  dyeShimmerScale: 5.5,
 };
-
-/** Full-screen baseline density so the liquid always covers the entire
- * viewport instead of appearing as isolated blobs over an empty field. */
-const DYE_BASELINE = 0.4;
-/** Fraction of the way back toward DYE_BASELINE the field relaxes each
- * frame — settles interaction bumps without ever draining to black. */
-const DYE_RELAX_RATE = 0.035;
-/** Amplitude/scale of the perpetual low-frequency shimmer layered on top of
- * the baseline so the surface always has visible motion, even at rest. */
-const DYE_SHIMMER_AMPLITUDE = 0.07;
-const DYE_SHIMMER_SCALE = 5.5;
 
 const FBO_OPTIONS: THREE.RenderTargetOptions = {
   wrapS: THREE.ClampToEdgeWrapping,
@@ -108,12 +110,16 @@ export class Simulation {
   private pressure: DoubleFBO;
   private divergenceTarget: THREE.WebGLRenderTarget;
   private curlTarget: THREE.WebGLRenderTarget;
+  /** Fixed diffusion RHS (b) for the duration of the Jacobi loop each step —
+   * same role as divergenceTarget plays for the pressure solve. */
+  private diffusionSource: THREE.WebGLRenderTarget;
 
   private materials: {
     advection: THREE.RawShaderMaterial;
     divergence: THREE.RawShaderMaterial;
     curl: THREE.RawShaderMaterial;
     vorticity: THREE.RawShaderMaterial;
+    diffuse: THREE.RawShaderMaterial;
     pressure: THREE.RawShaderMaterial;
     gradient: THREE.RawShaderMaterial;
     clear: THREE.RawShaderMaterial;
@@ -154,6 +160,7 @@ export class Simulation {
     this.pressure = new DoubleFBO(this.simWidth, this.simHeight);
     this.divergenceTarget = new THREE.WebGLRenderTarget(this.simWidth, this.simHeight, FBO_OPTIONS);
     this.curlTarget = new THREE.WebGLRenderTarget(this.simWidth, this.simHeight, FBO_OPTIONS);
+    this.diffusionSource = new THREE.WebGLRenderTarget(this.simWidth, this.simHeight, FBO_OPTIONS);
 
     this.materials = {
       advection: makeMaterial(advectionFrag, {
@@ -179,6 +186,13 @@ export class Simulation {
         curlStrength: { value: this.config.curlStrength },
         dt: { value: 0 },
       }),
+      diffuse: makeMaterial(diffuseFrag, {
+        texelSize: { value: new THREE.Vector2() },
+        uVelocity: { value: null },
+        uSource: { value: null },
+        alpha: { value: 0 },
+        beta: { value: 1 },
+      }),
       pressure: makeMaterial(pressureFrag, {
         texelSize: { value: new THREE.Vector2() },
         uPressure: { value: null },
@@ -199,6 +213,8 @@ export class Simulation {
         color: { value: new THREE.Vector3() },
         point: { value: new THREE.Vector2() },
         radius: { value: this.config.splatRadius },
+        dir: { value: new THREE.Vector2(0, 0) },
+        elongation: { value: 1 },
       }),
       ambient: makeMaterial(ambientFrag, {
         uVelocity: { value: null },
@@ -208,15 +224,15 @@ export class Simulation {
         scale: { value: this.config.ambientScale },
       }),
       fill: makeMaterial(fillFrag, {
-        value: { value: DYE_BASELINE },
+        value: { value: this.config.dyeBaseline },
       }),
       dyeNoise: makeMaterial(dyeNoiseFrag, {
         uSource: { value: null },
         time: { value: 0 },
-        amplitude: { value: DYE_SHIMMER_AMPLITUDE },
-        scale: { value: DYE_SHIMMER_SCALE },
-        baseline: { value: DYE_BASELINE },
-        relaxRate: { value: DYE_RELAX_RATE },
+        amplitude: { value: this.config.dyeShimmerAmplitude },
+        scale: { value: this.config.dyeShimmerScale },
+        baseline: { value: this.config.dyeBaseline },
+        relaxRate: { value: this.config.dyeRelaxRate },
       }),
     };
 
@@ -271,6 +287,7 @@ export class Simulation {
     this.materials.vorticity.uniforms.texelSize.value.copy(simTexel);
     this.materials.pressure.uniforms.texelSize.value.copy(simTexel);
     this.materials.gradient.uniforms.texelSize.value.copy(simTexel);
+    this.materials.diffuse.uniforms.texelSize.value.copy(simTexel);
     this.materials.splat.uniforms.aspectRatio.value = this.aspectRatio;
     void dyeTexel;
   }
@@ -287,6 +304,7 @@ export class Simulation {
     this.pressure.setSize(simW, simH);
     this.divergenceTarget.setSize(simW, simH);
     this.curlTarget.setSize(simW, simH);
+    this.diffusionSource.setSize(simW, simH);
     this.dye.setSize(dyeW, dyeH);
 
     this.setTexelUniforms();
@@ -363,6 +381,31 @@ export class Simulation {
     this.renderPass(gradient, this.velocity.write);
     this.velocity.swap();
 
+    // Viscous diffusion (implicit Jacobi solve) — optional, off by default
+    // (see DEFAULT_SIMULATION_CONFIG). This is what lets neighboring cells
+    // actually pull on each other; dissipation alone only shrinks a cell
+    // toward zero in place, it never equalizes it with its neighbors.
+    if (this.config.viscosity > 0 && this.config.diffusionIterations > 0) {
+      const clearCopy = this.materials.clear;
+      clearCopy.uniforms.uTexture.value = this.velocity.read.texture;
+      clearCopy.uniforms.value.value = 1.0;
+      this.renderPass(clearCopy, this.diffusionSource);
+
+      const cellSize = 1 / Math.max(this.simWidth, this.simHeight);
+      const alpha = (cellSize * cellSize) / (this.config.viscosity * dt);
+      const beta = 4 + alpha;
+
+      const diffuse = this.materials.diffuse;
+      diffuse.uniforms.uSource.value = this.diffusionSource.texture;
+      diffuse.uniforms.alpha.value = alpha;
+      diffuse.uniforms.beta.value = beta;
+      for (let i = 0; i < this.config.diffusionIterations; i++) {
+        diffuse.uniforms.uVelocity.value = this.velocity.read.texture;
+        this.renderPass(diffuse, this.velocity.write);
+        this.velocity.swap();
+      }
+    }
+
     // Advect velocity through itself, then advect dye through velocity.
     this.advectPass(this.velocity, this.config.velocityDissipation, dt, simTexel);
     this.advectPass(this.dye, this.config.densityDissipation, dt, dyeTexel);
@@ -379,11 +422,29 @@ export class Simulation {
     this.renderer.setRenderTarget(null);
   }
 
-  /** Injects a force + tint at a normalized (0..1) UV point into velocity and dye fields. */
-  splat(x: number, y: number, dx: number, dy: number, color: RGB, radiusScale = 1) {
+  /**
+   * Injects a force + tint at a normalized (0..1) UV point into velocity and
+   * dye fields. `direction` (need not be pre-normalized; the shader
+   * normalizes) shapes the splat into a comet — compressed ahead of travel,
+   * elongated behind it — instead of a circle; omit it (or leave it zero)
+   * for the original isotropic splat. `elongation` (>1) controls how
+   * pronounced that asymmetry is; 1 is a plain circle regardless of direction.
+   */
+  splat(
+    x: number,
+    y: number,
+    dx: number,
+    dy: number,
+    color: RGB,
+    radiusScale = 1,
+    direction: readonly [number, number] = [0, 0],
+    elongation = 1,
+  ) {
     const splat = this.materials.splat;
     splat.uniforms.radius.value = this.config.splatRadius * radiusScale;
     splat.uniforms.point.value.set(x, y);
+    splat.uniforms.dir.value.set(direction[0], direction[1]);
+    splat.uniforms.elongation.value = elongation;
 
     splat.uniforms.uTarget.value = this.velocity.read.texture;
     splat.uniforms.color.value.set(dx, dy, 0);
@@ -412,6 +473,7 @@ export class Simulation {
     this.pressure.dispose();
     this.divergenceTarget.dispose();
     this.curlTarget.dispose();
+    this.diffusionSource.dispose();
     this.quad.geometry.dispose();
     Object.values(this.materials).forEach((m) => m.dispose());
   }
