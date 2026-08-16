@@ -93,35 +93,6 @@ export function Hero() {
           </ProductFloat>
         </div>
       </motion.section>
-
-      <section id="about" className="mx-auto max-w-3xl px-8 py-24 text-center">
-        <h2 className="text-3xl font-semibold md:text-4xl">Small batches, no shortcuts.</h2>
-        <p className="mt-4 text-black/55">
-          Every cup is finished by hand in small runs — the glaze you see is the glaze you get,
-          never a photo trick.
-        </p>
-      </section>
-
-      <section id="story" className="mx-auto grid max-w-5xl gap-6 px-8 pb-24 md:grid-cols-2">
-        <div className="rounded-2xl border border-black/10 bg-black/[0.03] p-8 backdrop-blur-sm">
-          <h2 className="text-lg font-medium">Our Story</h2>
-          <p className="mt-3 text-sm text-black/50">
-            Derlings started as a single caramel recipe, refined until it earned the name
-            &ldquo;signature.&rdquo;
-          </p>
-        </div>
-        <div className="rounded-2xl border border-black/10 bg-black/[0.03] p-8 backdrop-blur-sm">
-          <h2 className="text-lg font-medium">Ingredients First</h2>
-          <p className="mt-3 text-sm text-black/50">
-            Real strawberries, real cream, real caramel — nothing in the cup is there to fake
-            richness.
-          </p>
-        </div>
-      </section>
-
-      <footer id="contact" className="px-8 py-10 text-center text-xs text-black/40">
-        © {new Date().getFullYear()} Derlings — crafted with care.
-      </footer>
     </>
   );
 }
