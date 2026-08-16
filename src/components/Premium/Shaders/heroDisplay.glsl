@@ -21,6 +21,8 @@ uniform float uDisplacement;
 uniform float uEdgeFeather;
 uniform float uBackdropBlurRadius;
 uniform float uBackdropDarken;
+uniform float uNormalGain;
+uniform float uNormalSampleScale;
 
 vec3 sampleBlurredBackdrop(vec2 uv) {
   // Fixed 8-tap circular kernel — cheap, no dependent texture reads beyond
@@ -41,13 +43,17 @@ vec3 sampleBlurredBackdrop(vec2 uv) {
 void main () {
   // Fake surface normal from the fluid dye field's density gradient — the
   // same trick the ambient milk layer uses — drives the liquid bend, kept
-  // separate from photo color entirely.
-  float L = texture2D(uDye, vUv - vec2(texelSize.x, 0.0)).r;
-  float R = texture2D(uDye, vUv + vec2(texelSize.x, 0.0)).r;
-  float T = texture2D(uDye, vUv + vec2(0.0, texelSize.y)).r;
-  float B = texture2D(uDye, vUv - vec2(0.0, texelSize.y)).r;
-  float gain = 14.0;
-  vec3 normal = normalize(vec3((L - R) * gain, (B - T) * gain, 0.6));
+  // separate from photo color entirely. Sampled several dye-texels wide
+  // (uNormalSampleScale) rather than one texel: a single-texel derivative
+  // reacts to the sharp edge of an injected splat and reads as a hard lens
+  // rim, whereas a wider sample reconstructs the gentler, lower-frequency
+  // slope of the surrounding fluid — a soft bulge, not a lens boundary.
+  vec2 step = texelSize * uNormalSampleScale;
+  float L = texture2D(uDye, vUv - vec2(step.x, 0.0)).r;
+  float R = texture2D(uDye, vUv + vec2(step.x, 0.0)).r;
+  float T = texture2D(uDye, vUv + vec2(0.0, step.y)).r;
+  float B = texture2D(uDye, vUv - vec2(0.0, step.y)).r;
+  vec3 normal = normalize(vec3((L - R) * uNormalGain, (B - T) * uNormalGain, 0.6));
 
   // Map screen UV into the contained photo's local space; outside [0,1] on
   // either axis means "not on the photo" — filled by the backdrop below.

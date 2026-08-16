@@ -10,6 +10,22 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-fraunces);
+
+  /* Derlings brand palette — used by the /experience cinematic pages. */
+  --color-navy: #22345b;
+  --color-cream: #f6f3ee;
+  --color-beige: #d8c3a5;
+  --color-chocolate: #3b2417;
+  --color-caramel: #c89b58;
+
+  /* Used by the nav bar and the bold-reveal section on /experience — a
+     distinct, brighter palette from the cinematic navy/cream tokens above,
+     so the two never get mixed up mid-project. */
+  --color-showcase-cream: #f9efe6;
+  --color-showcase-navy: #1e2c4c;
+  --font-display-showcase: var(--font-syne);
+  --font-body-showcase: var(--font-plus-jakarta);
 }
 
 html,

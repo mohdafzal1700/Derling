@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Geist, Geist_Mono } from "next/font/google";
 import { GlobalFluidLayer } from "@/components/Fluid/GlobalFluidLayer";
 import { Footer } from "@/components/Premium/Footer";
 import "./globals.css";
@@ -12,6 +12,20 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Editorial display serif for /experience's headlines — everything else on
+// the site stays on the grotesk (Geist); this is deliberately scoped to
+// feel like a distinct, more cinematic register, not a site-wide change.
+// Stands in for Canela/PP Editorial New (both paid, no license on hand) —
+// Fraunces' high optical-size contrast and sharp terminals read much closer
+// to that brief than Cormorant Garamond's classic-book-serif feel.
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  weight: "variable",
+  style: ["normal", "italic"],
+  axes: ["opsz", "SOFT", "WONK"],
 });
 
 export const metadata: Metadata = {
@@ -27,7 +41,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <GlobalFluidLayer />

@@ -24,12 +24,40 @@ export const fadeUpVariants: Variants = {
   },
 };
 
-export const logoEntranceVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.9 },
+/**
+ * Editorial reveal: fade + soft blur-to-sharp + a small vertical settle.
+ * Deliberately no scale/bounce — slow and intentional, for typography that
+ * should read as considered rather than "animated in".
+ */
+export const editorialRevealVariants: Variants = {
+  hidden: { opacity: 0, y: 16, filter: "blur(8px)" },
   visible: {
     opacity: 1,
-    scale: 1,
-    transition: { duration: 0.8, ease: PREMIUM_EASE },
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 1.2, ease: PREMIUM_EASE },
+  },
+};
+
+/** Same idea, smaller displacement — for the small uppercase section label,
+ * which shouldn't travel or blur as dramatically as the headline above it. */
+export const editorialLabelVariants: Variants = {
+  hidden: { opacity: 0, y: 8, filter: "blur(4px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.9, ease: PREMIUM_EASE },
+  },
+};
+
+export const logoEntranceVariants: Variants = {
+  hidden: { opacity: 0, y: -8, filter: "blur(6px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 1, ease: PREMIUM_EASE },
   },
 };
 

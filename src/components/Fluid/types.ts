@@ -17,6 +17,22 @@ export interface SimulationConfig {
   ambientAmplitude: number;
   /** Spatial frequency of the ambient curl-noise field. */
   ambientScale: number;
+  /** Kinematic viscosity for the implicit diffusion solve. 0 disables it
+   * (dissipation alone still approximates viscosity — see advection.glsl).
+   * Diffusion is what makes neighboring cells actually pull on each other;
+   * dissipation only shrinks a cell toward zero in place. */
+  viscosity: number;
+  /** Jacobi iterations for the diffusion solve. 0 disables it regardless of
+   * `viscosity`. Costs one extra full-field pass per iteration — keep low. */
+  diffusionIterations: number;
+  /** Amplitude of the perpetual low-frequency dye shimmer (idle "alive" motion). */
+  dyeShimmerAmplitude: number;
+  /** Spatial frequency of the dye shimmer field. */
+  dyeShimmerScale: number;
+  /** Fraction the dye field relaxes back toward `dyeBaseline` each step. */
+  dyeRelaxRate: number;
+  /** Density level the dye field is seeded with and relaxes toward at rest. */
+  dyeBaseline: number;
 }
 
 export interface PointerState {
