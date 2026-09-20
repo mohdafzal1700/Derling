@@ -8,14 +8,6 @@ import { PRODUCTS, getOtherProducts } from "@/data/products";
 import { isLightColor } from "@/lib/color";
 import { SPRING_SOFT } from "@/lib/animation";
 
-function ChevronLeft() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-      <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 function ChevronRight() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -40,15 +32,15 @@ export function ProductDetail({ initialSlug }: { initialSlug: string }) {
 
   const active = PRODUCTS[activeIndex];
   const nextProduct = PRODUCTS[(activeIndex + 1) % PRODUCTS.length];
-  const prevProduct = PRODUCTS[(activeIndex - 1 + PRODUCTS.length) % PRODUCTS.length];
   const light = isLightColor(active.accent);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   useEffect(() => {
     window.history.replaceState(null, "", `/premium/${active.slug}`);
+    setActiveImageIndex(0);
   }, [active.slug]);
 
   const goNext = () => setActiveIndex((i) => (i + 1) % PRODUCTS.length);
-  const goPrev = () => setActiveIndex((i) => (i - 1 + PRODUCTS.length) % PRODUCTS.length);
   const goTo = (slug: string) => setActiveIndex(PRODUCTS.findIndex((p) => p.slug === slug));
 
   return (
@@ -60,13 +52,15 @@ export function ProductDetail({ initialSlug }: { initialSlug: string }) {
         >
           <div>
             <span
-              className={`inline-block rounded-full px-4 py-1.5 text-xs font-bold tracking-widest uppercase ${light ? "bg-black/10 text-black/70" : "bg-white/90 text-black/70"}`}
+              className={`font-display-showcase inline-block rounded-full px-4 py-1.5 text-xs tracking-widest uppercase ${light ? "bg-black/10 text-black/70" : "bg-white/90 text-black/70"}`}
+              style={{ fontWeight: 700 }}
             >
               {active.badge}
             </span>
 
             <h1
-              className={`mt-6 text-5xl leading-[0.95] font-black uppercase md:text-6xl lg:text-7xl ${light ? "text-black" : "text-white"}`}
+              className={`font-display-showcase mt-6 text-5xl leading-[0.95] uppercase md:text-6xl lg:text-7xl ${light ? "text-black" : "text-white"}`}
+              style={{ fontWeight: 900 }}
             >
               {active.name}
             </h1>
@@ -117,30 +111,48 @@ export function ProductDetail({ initialSlug }: { initialSlug: string }) {
               ))}
             </div>
 
-            <div className="relative aspect-square w-full max-w-xl overflow-hidden rounded-[2.5rem] bg-black/[0.03]">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={active.slug}
-                  className="absolute inset-0"
-                  initial={{ scale: 0.55, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.55, opacity: 0 }}
-                  transition={SPRING_SOFT}
-                >
-                  <Image
-                    src={active.image}
-                    alt={active.name}
-                    fill
-                    priority
-                    className="object-contain"
-                    sizes="(min-width: 768px) 42rem, 100vw"
-                  />
-                </motion.div>
-              </AnimatePresence>
+            <div className="flex w-full max-w-xl flex-col gap-4">
+              <div className="relative aspect-square w-full overflow-hidden rounded-[2.5rem] bg-black/[0.03]">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={`${active.slug}-${activeImageIndex}`}
+                    className="absolute inset-0"
+                    initial={{ scale: 0.55, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.55, opacity: 0 }}
+                    transition={SPRING_SOFT}
+                  >
+                    <Image
+                      src={active.images[activeImageIndex]}
+                      alt={active.name}
+                      fill
+                      priority
+                      className="object-contain"
+                      sizes="(min-width: 768px) 42rem, 100vw"
+                    />
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              <div className="flex justify-center gap-3">
+                {active.images.map((image, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveImageIndex(i)}
+                    aria-label={`View image ${i + 1}`}
+                    aria-pressed={i === activeImageIndex}
+                    className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-black/[0.03] outline-none ring-inset transition ${
+                      i === activeImageIndex ? "ring-2 ring-[#0a1220]" : "opacity-60 hover:opacity-100"
+                    }`}
+                  >
+                    <Image src={image} alt={`${active.name} view ${i + 1}`} fill className="object-contain p-2" />
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="flex max-w-xs flex-col gap-3 text-center md:max-w-[11rem] md:items-start md:text-left">
-              <p className="text-sm text-black/55">{active.tagline}</p>
+              <p className="font-display text-base text-black/55 italic">{active.tagline}</p>
               <button className="self-center text-sm underline underline-offset-4 md:self-start">
                 Explore Collection
               </button>
@@ -160,7 +172,10 @@ export function ProductDetail({ initialSlug }: { initialSlug: string }) {
       </div>
 
       <section className="mt-24 px-6 md:px-16 lg:px-24">
-        <h2 className="text-4xl leading-[0.95] font-black uppercase text-[#0a1220] md:text-6xl">
+        <h2
+          className="font-display-showcase text-4xl leading-[0.95] uppercase text-[#0a1220] md:text-6xl"
+          style={{ fontWeight: 900 }}
+        >
           Maybe You&rsquo;ll <span className="text-[#c17a3d]">Love It</span>
         </h2>
 
@@ -176,7 +191,8 @@ export function ProductDetail({ initialSlug }: { initialSlug: string }) {
               >
                 <div className="relative aspect-square w-full">
                   <span
-                    className={`absolute top-6 left-6 z-10 rounded-full px-3 py-1 text-[11px] font-bold tracking-widest uppercase ${cardLight ? "bg-black/10 text-black/70" : "bg-white/90 text-black/70"}`}
+                    className={`font-display-showcase absolute top-6 left-6 z-10 rounded-full px-3 py-1 text-[11px] tracking-widest uppercase ${cardLight ? "bg-black/10 text-black/70" : "bg-white/90 text-black/70"}`}
+                    style={{ fontWeight: 700 }}
                   >
                     {product.badge}
                   </span>
@@ -200,37 +216,6 @@ export function ProductDetail({ initialSlug }: { initialSlug: string }) {
           })}
         </div>
       </section>
-
-      <div className="mt-16 flex items-center gap-4 border-t border-black/10 px-6 pt-8 md:px-16 lg:px-24">
-        <button
-          onClick={goPrev}
-          className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-black/10"
-        >
-          <Image src={prevProduct.image} alt={prevProduct.name} fill className="object-cover" />
-        </button>
-        <div>
-          <p className="text-sm font-medium">{prevProduct.name}</p>
-          <p className="text-xs text-black/40">
-            {activeIndex + 1}/{PRODUCTS.length}
-          </p>
-        </div>
-        <div className="ml-auto flex gap-2">
-          <button
-            onClick={goPrev}
-            aria-label="Previous product"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 transition hover:border-black/30"
-          >
-            <ChevronLeft />
-          </button>
-          <button
-            onClick={goNext}
-            aria-label="Next product"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 transition hover:border-black/30"
-          >
-            <ChevronRight />
-          </button>
-        </div>
-      </div>
 
       <button
         onClick={goNext}

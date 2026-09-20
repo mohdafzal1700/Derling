@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { Navbar } from "@/components/Premium/Navbar";
+import { ExperienceNav } from "@/components/Experience/ExperienceNav";
 import { ProductDetail } from "@/components/Premium/ProductDetail";
 import { PRODUCTS, getProduct } from "@/data/products";
 
@@ -33,7 +33,7 @@ export default async function ProductPage({
 
   return (
     <>
-      <Navbar light />
+      <ExperienceNav />
       <ProductDetail key={product.slug} initialSlug={product.slug} />
     </>
   );
