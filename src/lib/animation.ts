@@ -15,6 +15,14 @@ export const heroContainerVariants: Variants = {
   },
 };
 
+/** Per-word stagger container for headline text-reveal effects. */
+export const wordStaggerContainerVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.06 },
+  },
+};
+
 export const fadeUpVariants: Variants = {
   hidden: { opacity: 0, y: 24 },
   visible: {

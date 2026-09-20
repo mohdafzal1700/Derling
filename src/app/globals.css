@@ -64,3 +64,16 @@ body {
 .hover-shake:hover {
   animation: shake 0.4s ease-in-out;
 }
+
+@keyframes ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker-track {
+  animation: ticker 22s linear infinite;
+}
