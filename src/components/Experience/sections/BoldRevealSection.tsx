@@ -18,9 +18,15 @@ export function BoldRevealSection() {
       className="z-10 bg-showcase-cream px-6 md:px-12"
       contentClassName="relative mx-auto h-[70vh] w-full max-w-6xl"
     >
+      {/*
+        Matches the ExperienceFooter email wordmark, which condenses Syne to
+        ~58% of its natural width via SVG lengthAdjust. Reproduced here as a
+        scaleX so the heading keeps normal text flow (and the FloatingCup
+        overlay keeps its coordinates) instead of becoming SVG.
+      */}
       <h2
-        style={{ fontWeight: 900 }}
-        className="font-display-showcase relative z-10 text-5xl uppercase leading-[0.95] tracking-[-0.03em] text-showcase-navy sm:text-6xl md:text-7xl lg:text-8xl"
+        style={{ fontWeight: 800, transform: "scaleX(0.82)", transformOrigin: "left center" }}
+        className="font-display-showcase relative z-10 text-5xl uppercase leading-[0.95] tracking-normal text-showcase-navy sm:text-6xl md:text-7xl lg:text-8xl"
       >
         Bite into bold. Derlings like never before.
       </h2>

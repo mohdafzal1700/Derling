@@ -7,8 +7,8 @@ export function PartnerSection() {
     <section id="partner" className="relative z-10 bg-chocolate">
       <div className="relative flex min-h-[80vh] w-full items-center justify-center overflow-hidden px-6 py-24 md:px-12 md:py-28">
         <Image
-          src="/photo_3_2026-08-07_16-57-49.jpg"
-          alt="Derlings Signature Caramel Pudding, held up against a warm silk backdrop"
+          src="/letgrow.png"
+          alt="Derlings desserts spread, an invitation to partner and grow together"
           fill
           className="object-cover"
           sizes="100vw"
