@@ -1,12 +1,16 @@
 import Image from "next/image";
 import { Reveal } from "./Reveal";
+import { FitText } from "./FitText";
 
 const EMAIL = "derlingstoyou@gmail.com";
 
 const COLUMNS = [
   {
     heading: "Explore",
-    links: [{ label: "Partner With Us", href: "#partner" }],
+    links: [
+      { label: "Partner With Us", href: "#partner" },
+      { label: "Contact", href: "/contact" },
+    ],
   },
   {
     heading: "Get in Touch",
@@ -40,20 +44,7 @@ export function ExperienceFooter() {
             aria-label={`Email ${EMAIL}`}
             className="mt-5 block text-cream transition-colors duration-500 hover:text-caramel"
           >
-            <svg viewBox="0 0 1000 112" className="block h-auto w-full" role="img">
-              <text
-                x="0"
-                y="88"
-                textLength="1000"
-                lengthAdjust="spacingAndGlyphs"
-                fontSize="118"
-                fontWeight="800"
-                fill="currentColor"
-                className="font-display-showcase"
-              >
-                {EMAIL.toUpperCase()}
-              </text>
-            </svg>
+            <FitText>{EMAIL.toUpperCase()}</FitText>
           </a>
         </Reveal>
       </div>

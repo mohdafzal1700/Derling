@@ -24,7 +24,7 @@ export function PartnerSection() {
           <Reveal delay={0.05}>
             <h2
               style={{ fontWeight: 800 }}
-              className="font-display-showcase text-[9vw] leading-[0.95] tracking-[-0.02em] text-caramel uppercase sm:text-[6vw] md:text-[3.75rem]"
+              className="type-condensed type-condensed-center font-display-showcase text-[9vw] leading-[0.95] tracking-normal text-caramel uppercase sm:text-[6vw] md:text-[3.75rem]"
             >
               Let&rsquo;s grow together
             </h2>
@@ -39,7 +39,7 @@ export function PartnerSection() {
           <Reveal delay={0.15}>
             <div className="mt-8 flex justify-center">
               <MagneticButton
-                href="#contact"
+                href="/contact"
                 className="font-body-showcase group inline-flex items-center gap-4 rounded-full bg-caramel py-2.5 pr-10 pl-2.5 text-[14px] font-bold tracking-[0.06em] text-showcase-cream uppercase shadow-[0_10px_30px_rgba(200,155,88,0.35)] transition-colors duration-500 hover:bg-showcase-navy"
               >
                 <span

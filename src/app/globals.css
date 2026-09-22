@@ -35,6 +35,23 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Condensed display type — the letterforms of the footer email wordmark,
+   for headings that must stay real flowing text (they wrap to several
+   lines, so the fit-to-width <FitText> treatment cannot be used: it would
+   give every line a different width of glyph). Syne has no width axis, so a
+   horizontal scale is the only route to these shapes. Tune --condense to
+   taste; 1 is Syne's natural width. */
+.type-condensed {
+  display: inline-block;
+  transform: scaleX(var(--condense, 0.78));
+  transform-origin: left center;
+}
+
+/* Same, for headings inside a centred column. */
+.type-condensed-center {
+  transform-origin: center;
+}
+
 /* The fluid WebGL layer is fixed behind everything; UI content scrolls
    normally above it and must stay transparent so the liquid shows through. */
 .ui-layer {

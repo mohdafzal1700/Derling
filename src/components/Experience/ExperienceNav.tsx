@@ -6,7 +6,7 @@ import { navFadeVariants } from "@/lib/animation";
 
 const NAV_LINKS = [
   { label: "ABOUT", href: "/about" },
-  { label: "CONTACT", href: "#contact" },
+  { label: "CONTACT", href: "/contact" },
   { label: "SHOP", href: "/flavors" },
 ];
 
