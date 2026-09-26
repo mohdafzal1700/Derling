@@ -3,9 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useReducedMotion } from "framer-motion";
+import { Ban, Cherry, Milk } from "lucide-react";
 import { PRODUCTS } from "@/data/products";
 import { lerp } from "@/lib/animation";
 import { TextUnfoldReveal } from "./TextUnfoldReveal";
+
+const PROMISE_PILLARS = [
+  { icon: Milk, label: "Real cream", detail: "Rich and velvety" },
+  { icon: Cherry, label: "Real fruit", detail: "Naturally fresh" },
+  { icon: Ban, label: "No shortcuts", detail: "Just pure goodness" },
+];
 
 const WORDS = ["Story", "Behind", "Flavor"];
 /**
@@ -52,7 +59,7 @@ type ProductStoryProps = {
  */
 export function ProductStory({
   image = PRODUCTS[0].image,
-  baseColor = "#f7e6d6",
+  baseColor = "#f9efe6",
   headline = "Bringing slow-poured cream and honest flavor to every single cup.",
   quote = "Small batches, made fresh daily for every sweet craving — real cream, real fruit, softness inside.",
 }: ProductStoryProps) {
@@ -123,7 +130,7 @@ export function ProductStory({
               {WORDS.map((word, i) => (
                 <span
                   key={word}
-                  className="font-display-showcase whitespace-nowrap text-[#b6672f] uppercase"
+                  className="font-display-showcase whitespace-nowrap text-showcase-navy uppercase"
                   style={{
                     fontSize: "clamp(1.6rem, 4.3vw, 4.75rem)",
                     lineHeight: 0.95,
@@ -138,23 +145,93 @@ export function ProductStory({
           </div>
 
           <div
-            className="absolute inset-x-0 bottom-0 grid gap-8 px-6 pb-[4vh] md:grid-cols-2 md:items-end md:gap-12 md:px-16 lg:px-24"
-            style={{ transform: `translateY(${(1 - reveal) * 60}vh)` }}
+            className="absolute inset-x-0 top-[20vh] bottom-[4vh] grid gap-8 px-6 md:grid-cols-2 md:items-stretch md:gap-12 md:px-16 lg:px-24"
+            style={{ transform: `translateY(${(1 - reveal) * 30}vh)` }}
           >
-            <div className="relative aspect-4/5 w-full overflow-hidden bg-black/5 md:aspect-auto md:h-[70vh]">
+            <div className="relative aspect-4/5 w-full overflow-hidden bg-black/5 md:aspect-auto md:h-full">
               <Image src={image} alt="" fill className="object-cover" sizes="(min-width: 768px) 50vw, 100vw" />
             </div>
-            <div>
-              <p className="font-display text-xl leading-[1.15] font-medium text-balance italic md:text-3xl">
-                {headline}
-              </p>
-              <Image
-                src="/derlings-logo.svg"
-                alt="Derlings"
-                width={140}
-                height={79}
-                className="mt-4 h-8 w-auto"
-              />
+            <div className="flex flex-col md:ml-24 md:h-full md:justify-between">
+              <div
+                className="max-w-lg"
+                style={{ opacity: keyframes(reveal, [[0, 0], [0.2, 1]]) }}
+              >
+                <span
+                  aria-hidden
+                  className="font-display-showcase block leading-none text-showcase-navy/25 select-none"
+                  style={{ fontSize: "10rem" }}
+                >
+                  &ldquo;
+                </span>
+                <p className="font-body-showcase -mt-5 text-xs font-semibold tracking-[0.3em] text-showcase-navy/50 uppercase">
+                  Our promise
+                </p>
+
+                <h3 className="font-display-showcase mt-3 text-3xl leading-[1.05] font-extrabold text-nowrap text-showcase-navy uppercase md:text-4xl">
+                  Real ingredients.
+                  <br />
+                  Real indulgence.
+                </h3>
+
+                <p className="font-body-showcase mt-5 max-w-md text-base leading-relaxed text-showcase-navy/70">
+                  Real cream, real fruit, slow-poured by hand — no shortcuts, no fillers, just the honest way
+                  we&rsquo;ve always made it. Every batch is small enough to taste before it ever leaves the
+                  kitchen.
+                </p>
+
+                <div className="mt-8 flex flex-wrap items-start gap-x-8 gap-y-6">
+                  {PROMISE_PILLARS.map((pillar, i) => (
+                    <div
+                      key={pillar.label}
+                      className="flex flex-col items-start gap-3"
+                      style={{
+                        opacity: keyframes(reveal, [[0.2 + i * 0.1, 0], [0.5 + i * 0.1, 1]]),
+                        transform: `translateY(${(1 - keyframes(reveal, [[0.2 + i * 0.1, 0], [0.5 + i * 0.1, 1]])) * 12}px)`,
+                      }}
+                    >
+                      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-showcase-navy/[0.06]">
+                        <pillar.icon className="h-5 w-5 text-showcase-navy/70" strokeWidth={1.5} />
+                      </span>
+                      <div>
+                        <p className="font-body-showcase text-sm font-semibold text-showcase-navy">{pillar.label}</p>
+                        <p className="font-body-showcase text-showcase-navy/50 text-xs">{pillar.detail}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="w-full">
+                <p
+                  className="font-display text-2xl leading-snug font-medium italic md:text-3xl"
+                  style={{
+                    opacity: keyframes(reveal, [[0.4, 0], [0.7, 1]]),
+                    transform: `translateY(${(1 - keyframes(reveal, [[0.4, 0], [0.7, 1]])) * 10}px)`,
+                  }}
+                >
+                  {headline.includes("every single cup") ? (
+                    <>
+                      {headline.replace(/\s*every single cup\.?$/, "")}
+                      <br />
+                      every single cup.
+                    </>
+                  ) : (
+                    headline
+                  )}
+                </p>
+
+                <Image
+                  src="/derlings-logo.svg"
+                  alt="Derlings"
+                  width={140}
+                  height={79}
+                  className="mt-5 h-12 w-auto"
+                  style={{
+                    opacity: keyframes(reveal, [[0.6, 0], [1, 1]]),
+                    transform: `translateY(${(1 - keyframes(reveal, [[0.6, 0], [1, 1]])) * 10}px)`,
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -167,7 +244,7 @@ export function ProductStory({
         <TextUnfoldReveal
           text={quote}
           as="p"
-          className="font-display-showcase max-w-3xl text-center text-3xl leading-[1.05] text-[#b6672f] uppercase md:text-5xl"
+          className="font-display-showcase max-w-3xl text-center text-3xl leading-[1.05] text-showcase-navy uppercase md:text-5xl"
         />
       </section>
     </>
