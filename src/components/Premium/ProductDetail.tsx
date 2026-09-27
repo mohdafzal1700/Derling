@@ -83,7 +83,7 @@ export function ProductDetail({ initialSlug }: { initialSlug: string }) {
 
           <div>
             <p className={`text-4xl font-black ${light ? "text-black" : "text-white"}`}>
-              ${active.price.toFixed(2)}
+              &#8377;{active.price.toFixed(2)}
             </p>
             <button
               className={`mt-5 w-full rounded-full py-4 text-base font-bold tracking-wide uppercase transition hover:opacity-90 md:w-auto md:px-14 ${light ? "bg-black text-white" : "bg-white text-black"}`}
@@ -180,40 +180,66 @@ export function ProductDetail({ initialSlug }: { initialSlug: string }) {
         </h2>
 
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {getOtherProducts(active.slug).map((product) => {
-            const cardLight = isLightColor(product.accent);
-            return (
-              <button
-                key={product.slug}
-                onClick={() => router.push(`/premium/${product.slug}`)}
-                className="flex flex-col overflow-hidden rounded-[2rem] text-left transition hover:-translate-y-1"
-                style={{ backgroundColor: product.accent }}
-              >
-                <div className="relative aspect-square w-full">
-                  <span
-                    className={`font-display-showcase absolute top-6 left-6 z-10 rounded-full px-3 py-1 text-[11px] tracking-widest uppercase ${cardLight ? "bg-black/10 text-black/70" : "bg-white/90 text-black/70"}`}
-                    style={{ fontWeight: 700 }}
-                  >
-                    {product.badge}
-                  </span>
-                  <Image src={product.image} alt={product.name} fill className="object-contain p-10" />
+          {getOtherProducts(active.slug).map((product) => (
+            <button
+              key={product.slug}
+              onClick={() => router.push(`/premium/${product.slug}`)}
+              className="group flex flex-col text-left transition-transform duration-300 hover:-translate-y-1"
+            >
+              <div className="relative aspect-[6/5] w-full overflow-hidden rounded-2xl bg-[#efece5]">
+                {/* Frosted-glass shade behind the product. Backdrop-blur
+                    needs actual detail behind it to visibly blur — a flat
+                    color has none — so two oversized, sharply blurred color
+                    blobs sit underneath, and the glass layer on top smears
+                    them into genuine frosted texture instead of just tinting
+                    flat. */}
+                <div
+                  aria-hidden
+                  className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-60"
+                >
+                  <div
+                    className="absolute -top-1/4 -left-1/4 h-3/4 w-3/4 rounded-full blur-3xl"
+                    style={{ backgroundColor: product.accent }}
+                  />
+                  <div
+                    className="absolute -right-1/4 -bottom-1/4 h-3/4 w-3/4 rounded-full blur-3xl"
+                    style={{ backgroundColor: product.accent, opacity: 0.7 }}
+                  />
                 </div>
-                <div className="px-6 pb-6">
-                  <p className={`text-xl font-bold ${cardLight ? "text-black" : "text-white"}`}>
-                    {product.name}
-                  </p>
-                  <p className={`mt-1 text-sm font-semibold ${cardLight ? "text-black/60" : "text-white/70"}`}>
-                    ${product.price.toFixed(2)}
-                  </p>
-                  <span
-                    className={`mt-4 flex w-full items-center justify-center rounded-full py-3 text-sm font-bold uppercase ${cardLight ? "bg-black text-white" : "bg-white text-black"}`}
-                  >
-                    Taste It
-                  </span>
-                </div>
-              </button>
-            );
-          })}
+                <div
+                  aria-hidden
+                  className="absolute inset-0 opacity-0 backdrop-blur-xl transition-opacity duration-500 group-hover:opacity-100"
+                  style={{
+                    background:
+                      "linear-gradient(160deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.08) 60%, rgba(255,255,255,0.3) 100%)",
+                  }}
+                />
+                <div
+                  aria-hidden
+                  className="absolute inset-0 rounded-2xl opacity-0 ring-1 ring-white/70 transition-opacity duration-500 group-hover:opacity-100"
+                />
+
+                <Image
+                  src={product.image}
+                  alt={product.name}
+                  fill
+                  className="relative object-contain p-10 transition-transform duration-500 group-hover:scale-105"
+                />
+
+                <span className="font-display-showcase absolute inset-x-4 bottom-4 translate-y-3 rounded-full bg-black py-2.5 text-center text-xs tracking-widest text-white uppercase opacity-0 shadow-lg transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                  View Flavor
+                </span>
+              </div>
+
+              <div className="mt-4 flex items-baseline justify-between gap-3">
+                <p className="text-sm font-medium text-black transition-colors duration-300 group-hover:text-[#c17a3d]">
+                  {product.name}
+                </p>
+                <p className="text-sm font-bold text-black">&#8377;{product.price.toFixed(2)}</p>
+              </div>
+              <p className="mt-1 line-clamp-2 text-sm text-black/50">{product.description}</p>
+            </button>
+          ))}
         </div>
       </section>
 
