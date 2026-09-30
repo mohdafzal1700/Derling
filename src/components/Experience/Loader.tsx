@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { PREMIUM_EASE } from "@/lib/animation";
+import { WrittenWordmark } from "./WrittenWordmark";
 
 type Phase = "idle" | "logo" | "reveal" | "done";
 
@@ -17,12 +18,8 @@ export function Loader({ onComplete }: { onComplete: () => void }) {
       const t = setTimeout(() => setPhase("reveal"), 250);
       return () => clearTimeout(t);
     }
-
-    const timers = [
-      setTimeout(() => setPhase("logo"), 150),
-      setTimeout(() => setPhase("reveal"), 1400),
-    ];
-    return () => timers.forEach(clearTimeout);
+    const t = setTimeout(() => setPhase("logo"), 150);
+    return () => clearTimeout(t);
   }, [prefersReducedMotion]);
 
   useEffect(() => {
@@ -50,11 +47,7 @@ export function Loader({ onComplete }: { onComplete: () => void }) {
             className="absolute inset-0 flex flex-col items-center justify-center"
             exit={{ opacity: 0, transition: { duration: 0.3 } }}
           >
-            <motion.div
-              initial={{ opacity: 0, filter: "blur(10px)" }}
-              animate={{ opacity: 1, filter: "blur(0px)" }}
-              transition={{ duration: 1, ease: PREMIUM_EASE }}
-            >
+            {prefersReducedMotion ? (
               <Image
                 src="/derlings-logo.svg"
                 alt="Derlings"
@@ -63,7 +56,20 @@ export function Loader({ onComplete }: { onComplete: () => void }) {
                 className="h-36 w-auto md:h-48"
                 priority
               />
-            </motion.div>
+            ) : (
+              <WrittenWordmark
+                className="h-40 w-auto md:h-52"
+                onDone={() => {
+                  // Hold on the fully inked, solid-filled mark for a beat
+                  // before the reveal starts — otherwise the fill finishes
+                  // and the fade-out begins in the same instant, so the
+                  // filled logo never actually gets seen.
+                  setTimeout(() => {
+                    setPhase((p) => (p === "logo" ? "reveal" : p));
+                  }, 700);
+                }}
+              />
+            )}
           </motion.div>
         )}
       </AnimatePresence>
