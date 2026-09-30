@@ -170,7 +170,7 @@ export function BoldRevealSection() {
           style={{ opacity: contentOpacity, y: contentY }}
           className="relative z-20 mx-auto w-full"
         >
-          <CondensedHeadline lines={LINES} className="text-showcase-navy" />
+          <CondensedHeadline lines={LINES} className="text-showcase-navy" animateLetters underline />
         </motion.div>
 
         <div className="pointer-events-none absolute inset-0 z-30">

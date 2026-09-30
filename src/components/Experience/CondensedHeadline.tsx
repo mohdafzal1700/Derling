@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 
 /**
  * The measurement has to land before paint or the headline visibly resizes,
@@ -39,10 +40,16 @@ export function CondensedHeadline({
    */
   sizeRatio = 0.105,
   className,
+  /** Reveal letter-by-letter, like the line being written, instead of appearing all at once. */
+  animateLetters = false,
+  /** Draw a short underline in after the last letter lands. */
+  underline = false,
 }: {
   lines: string[];
   sizeRatio?: number;
   className?: string;
+  animateLetters?: boolean;
+  underline?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const probeRef = useRef<HTMLDivElement>(null);
@@ -110,13 +117,72 @@ export function CondensedHeadline({
             width: `${100 / fit.scaleX}%`,
           }}
         >
-          {lines.map((line) => (
-            <div key={line} className="whitespace-nowrap">
-              {line}
-            </div>
-          ))}
+          {animateLetters ? (
+            <LetterWrittenLines lines={lines} />
+          ) : (
+            lines.map((line) => (
+              <div key={line} className="whitespace-nowrap">
+                {line}
+              </div>
+            ))
+          )}
+
+          {underline ? (
+            <motion.span
+              aria-hidden
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{
+                duration: 0.6,
+                ease: [0.65, 0, 0.35, 1],
+                delay: animateLetters ? lettersInLines(lines).length * LETTER_STAGGER + 0.3 : 0.4,
+              }}
+              className="mt-[0.15em] block h-[0.06em] w-[3em] rounded-full bg-current"
+              style={{ transformOrigin: "left" }}
+            />
+          ) : null}
         </div>
       ) : null}
     </div>
+  );
+}
+
+const LETTER_STAGGER = 0.028;
+
+function lettersInLines(lines: string[]) {
+  return lines.join("").replace(/\s/g, "").split("");
+}
+
+/**
+ * Renders each line's characters as individual spans that rise + settle in
+ * one after another — a "being written" reveal — with a single stagger index
+ * running across all lines so the whole headline writes itself as one
+ * continuous motion rather than restarting per line.
+ */
+function LetterWrittenLines({ lines }: { lines: string[] }) {
+  let index = 0;
+
+  return (
+    <>
+      {lines.map((line, lineIndex) => (
+        <div key={line} className="whitespace-nowrap">
+          {line.split("").map((char, charIndex) => {
+            const delay = index * LETTER_STAGGER;
+            if (char !== " ") index += 1;
+            return (
+              <motion.span
+                key={`${lineIndex}-${charIndex}`}
+                className="inline-block"
+                initial={{ opacity: 0, y: "0.35em", rotate: -6 }}
+                animate={{ opacity: 1, y: 0, rotate: 0 }}
+                transition={{ duration: 0.45, delay, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {char === " " ? " " : char}
+              </motion.span>
+            );
+          })}
+        </div>
+      ))}
+    </>
   );
 }
