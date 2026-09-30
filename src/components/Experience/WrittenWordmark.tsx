@@ -5,12 +5,11 @@ import { useId } from "react";
 
 /**
  * The four compound paths straight out of /public/derlings-logo.svg (same
- * artwork, just inlined so we can drive the reveal per-path instead of
- * treating the mark as one opaque raster image). Split roughly left→right
- * by their first M coordinate: the "D" swash, the bulk of "erling" plus the
- * dotted counters, the small accent dot, and — sitting well below the
- * others' baseline — what's already a calligraphic flourish swash under the
- * word, drawn last as the "underline" beat.
+ * artwork, just inlined so the reveal can be driven per-shape instead of
+ * treating the mark as one opaque raster image): the "D" swash, the bulk of
+ * "erlings" as one continuous joined script stroke, the dotted counters, and
+ * — sitting well below the others' baseline — what's already a calligraphic
+ * flourish swash under the word, revealed last as the underline beat.
  */
 const D_SWASH =
   "M597.11,369.75c-11.93,24.12-21.16,48.36-29.92,73.98l-37.95,110.98c-6.83,19.96-14.73,38.38-23.71,57.34-7.74,16.33-16.45,31-28.29,45.54,18.13,4.1,35.62,7.44,54.11,6.21,38.72-2.58,72.96-21.42,98.56-50.14,16.93-19,29.88-39.77,38.51-63.97,19.44-54.51,24.5-123.17-8.33-172.16-14.24-21.24-34.61-36.86-59.53-42.84-50.41-12.11-102.95,1.14-140.86,35.99-14.62,13.44-25.63,28.59-33.06,46.99-9.56,23.65-9.67,57.1,12.36,69.78,10.05,5.79,20.17,4.13,32.83,3.26l-16.63,12.68c-15.3,9.92-34.21,10.16-50.46,1.63-15.92-8.35-26.68-23.58-29.91-41.61-8.1-45.18,19.95-88.01,56.96-113.47,50.06-34.45,111.37-47.16,171.27-37.05,74.72,12.61,125.28,76.34,128.85,151.38,2.24,47.01-9.62,92.47-33.81,132.75-29.76,49.56-76.94,85.81-135.61,91.13-33.49,3.04-66.19-3.04-97.86-15.49-17.42,17.71-38.87,29.57-63.62,34.03-8.91,1.61-18.46.6-27.52.38-9.52-2.29-18.22-5.4-25.28-11.75-8.66-7.79-10.05-19.57-3.31-29.12,19.7-27.93,67-30.21,99.12-18.37,10.85-27.81,18.41-54.81,28.02-82.32l28.72-82.21,25.91-65.72c4.97-12.6,11.02-24.05,18.93-34.85,8.56-11.67,20.79-19.18,35.42-20.68l20.54-.15-4.46,7.87ZM433.96,663.09l-19.95-4.04c-19.79-4.01-41.11,8.4-38.68,21.21.48,2.52,3.65,6.13,6.76,7.39,17.56,7.09,40.44-7.87,51.87-24.56Z";
@@ -24,31 +23,32 @@ const DOT_ACCENT =
 const UNDERLINE_FLOURISH =
   "M970.76,698.35c-75.04,14.17-148.06,32.85-221.32,53.79l-53.03,15.16c-10.61,3.03-22.02,4.07-32.71,2.39-17.87-2.8-34.62-25.56-32.4-43.38l29.27-2.05,73.8-12.21,46.69-9.23,88.25-16.81,77.93-13.87,14.09-1.72c50.14-7.84,99.57-13.89,150.34-16.17l59.15-.04,25.44,1.8c18.61,1.32,36.66,4.15,53.48,12.04,8.49,3.98,14.43,12.96,12.55,22.17-1.47,7.19-9,11.41-15.92,12.6l-.84-5.17c-2.03-12.53-35.46-20.46-49.91-20.45l-64.08.02-49.96,3.93-110.81,17.21Z";
 
-/**
- * Reveal timing — strictly sequential, each beat starting only once the
- * previous one has fully traced, so it reads as "D, then the rest of the
- * word in order, then the dot, then the underline."
- */
-const D_DURATION = 0.9;
-const BODY_DURATION = 2;
-const DOT_DURATION = 0.3;
+const NAVY = "#1e2c4c";
+
+/** Total time for the word (D through the joined "erlings" body + dot) to sweep fully into view. */
+const WORD_DURATION = 2.6;
+/** The underline flourish only starts once the word above has fully revealed. */
 const UNDERLINE_DURATION = 0.8;
 
-const T_D = 0;
-const T_BODY = T_D + D_DURATION;
-const T_DOT = T_BODY + BODY_DURATION;
-const T_UNDERLINE = T_DOT + DOT_DURATION;
-
 /**
- * The real wordmark's own vector paths. Rather than drawing the letters as
- * thin animated strokes (which only ever traces their outline — it can't
- * read as "solid ink" no matter how thick the stroke, because the letterforms
- * have plenty of interior fill area a simple outline never covers), the
- * solid-filled mark sits underneath a <mask>, and it's the MASK's strokes —
- * thick enough to fully paint over each letter's fill as they pass — that
- * animate via `pathLength`. The visible result is the actual solid navy
- * lettering being progressively uncovered along the pen path, not an
- * outline that fills in afterward.
+ * The real wordmark's own vector paths, revealed as solid navy ink rather
+ * than an animated stroke outline (an outline can never read as "solid" — it
+ * only ever traces the letterform's edge, no matter how thick, leaving the
+ * interior unfilled). The solid-filled shapes sit under an SVG <mask>, and
+ * it's the mask's own content that animates:
+ *
+ * - The word (D + the joined "erlings" script + the dotted counters) is
+ *   revealed by a plain left-to-right sweeping rectangle, not by tracing the
+ *   letter outlines. "erlings" is one continuous joined pen stroke in the
+ *   vector data — there's no actual letter-boundary to cut at — so a
+ *   positional wipe is what guarantees the strict D → e → r → l → i → n → g → s
+ *   left-to-right order, regardless of how the underlying path points happen
+ *   to be ordered.
+ * - The underline flourish (already part of the artwork, sitting below the
+ *   word's baseline) reveals afterward via its own stroke `pathLength`, since
+ *   it's a single decorative swash rather than letterforms.
+ *
+ * Both end up the exact same solid navy — no separate accent color.
  */
 export function WrittenWordmark({
   className,
@@ -62,39 +62,18 @@ export function WrittenWordmark({
   return (
     <svg viewBox="0 0 1920 1080" className={className}>
       <defs>
-        <mask id={maskId} maskUnits="userSpaceOnUse" x={0} y={0} width={1920} height={1080}>
-          <motion.path
-            d={D_SWASH}
-            fill="none"
-            stroke="#fff"
-            strokeWidth={90}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: D_DURATION, delay: T_D, ease: [0.65, 0, 0.35, 1] }}
+        <mask id={`${maskId}-word`} maskUnits="userSpaceOnUse" x={0} y={0} width={1920} height={1080}>
+          <motion.rect
+            x={0}
+            y={0}
+            height={1080}
+            fill="#fff"
+            initial={{ width: 0 }}
+            animate={{ width: 1920 }}
+            transition={{ duration: WORD_DURATION, ease: "linear" }}
           />
-          <motion.path
-            d={WORD_BODY}
-            fill="none"
-            stroke="#fff"
-            strokeWidth={90}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: BODY_DURATION, delay: T_BODY, ease: "linear" }}
-          />
-          <motion.path
-            d={DOT_ACCENT}
-            fill="none"
-            stroke="#fff"
-            strokeWidth={70}
-            strokeLinecap="round"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: DOT_DURATION, delay: T_DOT, ease: "easeOut" }}
-          />
+        </mask>
+        <mask id={`${maskId}-underline`} maskUnits="userSpaceOnUse" x={0} y={0} width={1920} height={1080}>
           <motion.path
             d={UNDERLINE_FLOURISH}
             fill="none"
@@ -104,19 +83,23 @@ export function WrittenWordmark({
             strokeLinejoin="round"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: UNDERLINE_DURATION, delay: T_UNDERLINE, ease: [0.65, 0, 0.35, 1] }}
+            transition={{ duration: UNDERLINE_DURATION, delay: WORD_DURATION, ease: [0.65, 0, 0.35, 1] }}
             onAnimationComplete={() => onDone?.()}
           />
         </mask>
       </defs>
 
-      {/* The actual solid-filled mark, always fully painted underneath —
-          only what the mask above has revealed shows through. */}
-      <g mask={`url(#${maskId})`}>
-        <path d={D_SWASH} fill="#1e2c4c" />
-        <path d={WORD_BODY} fill="#1e2c4c" />
-        <path d={DOT_ACCENT} fill="#1e2c4c" />
-        <path d={UNDERLINE_FLOURISH} fill="#c17a3d" />
+      {/* The word — always solid-filled underneath; the wipe mask above
+          reveals it strictly left to right. */}
+      <g mask={`url(#${maskId}-word)`}>
+        <path d={D_SWASH} fill={NAVY} />
+        <path d={WORD_BODY} fill={NAVY} />
+        <path d={DOT_ACCENT} fill={NAVY} />
+      </g>
+
+      {/* The underline flourish — same solid navy, revealed last. */}
+      <g mask={`url(#${maskId}-underline)`}>
+        <path d={UNDERLINE_FLOURISH} fill={NAVY} />
       </g>
     </svg>
   );
