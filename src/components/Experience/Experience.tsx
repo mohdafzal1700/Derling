@@ -83,10 +83,6 @@ export function Experience() {
           {!motionDisabled && <CursorParticles disabled={lowEnd} />}
         </ParallaxScene>
 
-        {/* Grounds the headline against a bright, busy photo without ever
-            covering the product art itself. */}
-        <div className="absolute inset-x-0 bottom-0 z-[5] h-[55%] bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
-
         <ExperienceHero disabled={motionDisabled} />
       </motion.section>
     </>

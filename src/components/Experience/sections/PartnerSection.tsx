@@ -24,7 +24,7 @@ export function PartnerSection() {
           <Reveal delay={0.05}>
             <h2
               style={{ fontWeight: 800 }}
-              className="type-condensed type-condensed-center font-display-showcase text-[9vw] leading-[0.95] tracking-normal text-caramel uppercase sm:text-[6vw] md:text-[3.75rem]"
+              className="type-condensed type-condensed-center font-display-showcase text-[9vw] leading-[0.95] tracking-normal text-showcase-navy uppercase sm:text-[6vw] md:text-[3.75rem]"
             >
               Let&rsquo;s grow together
             </h2>
@@ -40,11 +40,11 @@ export function PartnerSection() {
             <div className="mt-8 flex justify-center">
               <MagneticButton
                 href="/contact"
-                className="font-body-showcase group inline-flex items-center gap-4 rounded-full bg-caramel py-2.5 pr-10 pl-2.5 text-[14px] font-bold tracking-[0.06em] text-showcase-cream uppercase shadow-[0_10px_30px_rgba(200,155,88,0.35)] transition-colors duration-500 hover:bg-showcase-navy"
+                className="font-body-showcase group inline-flex items-center gap-4 rounded-full bg-showcase-navy py-2.5 pr-10 pl-2.5 text-[14px] font-bold tracking-[0.06em] text-showcase-cream uppercase shadow-[0_10px_30px_rgba(30,44,76,0.35)] transition-colors duration-500 hover:bg-caramel"
               >
                 <span
                   aria-hidden
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-showcase-cream text-[18px] leading-none text-caramel transition-transform duration-500 group-hover:translate-x-1"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-showcase-cream text-[18px] leading-none text-showcase-navy transition-transform duration-500 group-hover:translate-x-1"
                 >
                   →
                 </span>

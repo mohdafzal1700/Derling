@@ -28,6 +28,23 @@ const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : us
  * guess at the font metrics, and being wrong overflows the viewport or leaves
  * the frame half empty. `scaleX` is also the only lever available — Syne ships
  * no width axis, so `font-stretch` does nothing to it.
+ *
+ * Two render modes, chosen with `align`:
+ *  - "left" (default): the ORIGINAL full-bleed/ragged treatment. Each line is
+ *    left-flush, so a short line trails off short on the right — the box is
+ *    pre-widened to `100/scaleX`% and squeezed from its LEFT edge, landing
+ *    each line back at exactly 100% of the container with no dead gutter.
+ *  - "center": each line centers independently (a short line ends up shorter
+ *    on BOTH sides, not just the right). Neither `text-align: center` nor
+ *    `margin-inline: auto` can do this part: both only center content
+ *    NARROWER than its box, because a wider box needs NEGATIVE margins to
+ *    center, and the spec forbids negative *auto* margins — the used value
+ *    is clamped to zero on the left and the whole overflow dumped on the
+ *    right, so both techniques quietly degrade to flush-left exactly when a
+ *    line is wide enough to need squeezing at all. `left: 50%` +
+ *    `translateX(-50%)` has no such clamp (ordinary `left` and `transform`
+ *    offsets go negative freely), so it's the one centering trick that still
+ *    works once the natural width exceeds the container.
  */
 export function CondensedHeadline({
   lines,
@@ -39,6 +56,10 @@ export function CondensedHeadline({
    * stems thin out against the horizontals and the face starts to look broken.
    */
   sizeRatio = 0.105,
+  align = "left",
+  uppercase = true,
+  leadingClassName = "leading-[0.85]",
+  trackingClassName = "tracking-[-0.01em]",
   className,
   /** Reveal letter-by-letter, like the line being written, instead of appearing all at once. */
   animateLetters = false,
@@ -47,13 +68,19 @@ export function CondensedHeadline({
 }: {
   lines: string[];
   sizeRatio?: number;
+  align?: "left" | "center";
+  uppercase?: boolean;
+  leadingClassName?: string;
+  trackingClassName?: string;
   className?: string;
   animateLetters?: boolean;
   underline?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const probeRef = useRef<HTMLDivElement>(null);
-  const [fit, setFit] = useState<{ fontSize: number; scaleX: number } | null>(null);
+  const [fit, setFit] = useState<{ fontSize: number; scaleX: number; naturals: number[] } | null>(
+    null,
+  );
 
   const measure = useCallback(() => {
     const container = containerRef.current;
@@ -65,13 +92,14 @@ export function CondensedHeadline({
 
     const fontSize = width * sizeRatio;
     probe.style.fontSize = `${fontSize}px`;
-    // Widest line at its natural, unsqueezed width. The probe is `nowrap`, so
-    // this is the true single-line advance, not a wrapped box.
-    const natural = Math.max(
-      ...Array.from(probe.children, (child) => child.getBoundingClientRect().width),
-    );
+    // Each line's natural, unsqueezed width. The probe is `nowrap`, so this is
+    // the true single-line advance, not a wrapped box. "center" mode needs
+    // every line's own width (to center each one correctly); "left" mode only
+    // ever needed the widest.
+    const naturals = Array.from(probe.children, (child) => child.getBoundingClientRect().width);
+    const natural = Math.max(...naturals);
 
-    setFit({ fontSize, scaleX: natural > 0 ? Math.min(1, width / natural) : 1 });
+    setFit({ fontSize, scaleX: natural > 0 ? Math.min(1, width / natural) : 1, naturals });
   }, [sizeRatio]);
 
   useIsomorphicLayoutEffect(measure, [measure, lines]);
@@ -89,6 +117,8 @@ export function CondensedHeadline({
     return () => observer.disconnect();
   }, [measure]);
 
+  const caseClassName = uppercase ? "uppercase" : "";
+
   return (
     <div ref={containerRef} className={className}>
       {/* Measured off-flow at the real font, never painted. `invisible` rather
@@ -96,7 +126,7 @@ export function CondensedHeadline({
       <div
         ref={probeRef}
         aria-hidden
-        className="font-display-showcase pointer-events-none invisible absolute whitespace-nowrap uppercase"
+        className={`font-display-showcase pointer-events-none invisible absolute whitespace-nowrap ${caseClassName}`}
         style={{ fontWeight: 800 }}
       >
         {lines.map((line) => (
@@ -104,9 +134,9 @@ export function CondensedHeadline({
         ))}
       </div>
 
-      {fit ? (
+      {fit && align === "left" ? (
         <div
-          className="font-display-showcase uppercase leading-[0.85] tracking-[-0.01em]"
+          className={`font-display-showcase ${caseClassName} ${leadingClassName} ${trackingClassName}`}
           style={{
             fontWeight: 800,
             fontSize: `${fit.fontSize}px`,
@@ -141,6 +171,31 @@ export function CondensedHeadline({
               style={{ transformOrigin: "left" }}
             />
           ) : null}
+        </div>
+      ) : null}
+
+      {fit && align === "center" ? (
+        <div
+          className={`font-display-showcase ${caseClassName} ${leadingClassName} ${trackingClassName}`}
+          style={{ fontWeight: 800, fontSize: `${fit.fontSize}px` }}
+        >
+          {lines.map((line, i) => (
+            <div
+              key={line}
+              className="relative whitespace-nowrap"
+              style={{
+                // The line's own natural (pre-squeeze) width, explicitly, so
+                // the translateX(-50%) below has a real box size to center
+                // against instead of a shrink-to-fit one.
+                width: `${fit.naturals[i] ?? 0}px`,
+                left: "50%",
+                transform: `translateX(-50%) scaleX(${fit.scaleX})`,
+                transformOrigin: "center",
+              }}
+            >
+              {line}
+            </div>
+          ))}
         </div>
       ) : null}
     </div>

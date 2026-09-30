@@ -5,10 +5,10 @@ import { useState } from "react";
 const EMAIL = "derlingstoyou@gmail.com";
 
 const FIELD_CLASS =
-  "font-body-showcase w-full rounded-2xl border border-showcase-navy/15 bg-white/60 px-5 py-4 text-[15px] text-showcase-navy placeholder:text-showcase-navy/35 outline-none transition-colors duration-300 focus:border-caramel focus:bg-white";
+  "font-body-showcase w-full rounded-xl border border-showcase-navy/15 bg-white/60 px-4 py-3 text-[15px] text-showcase-navy placeholder:text-showcase-navy/35 outline-none transition-colors duration-300 focus:border-caramel focus:bg-white";
 
 const LABEL_CLASS =
-  "font-body-showcase mb-2 block text-[15px] font-medium text-showcase-navy/80";
+  "font-body-showcase mb-2 block text-[13px] font-medium text-showcase-navy/70";
 
 /**
  * There is no mail/CRM backend wired up on this project yet, so the form
@@ -44,8 +44,8 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-7">
-      <div className="grid gap-7 sm:grid-cols-2">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="name" className={LABEL_CLASS}>
             Name*
@@ -77,7 +77,7 @@ export function ContactForm() {
 
       <div>
         <label htmlFor="email" className={LABEL_CLASS}>
-          Your digital address*
+          Email*
         </label>
         <input
           id="email"
@@ -97,7 +97,7 @@ export function ContactForm() {
         <textarea
           id="message"
           name="message"
-          rows={6}
+          rows={4}
           placeholder="Tell us your idea"
           className={`${FIELD_CLASS} resize-y`}
         />
@@ -105,7 +105,7 @@ export function ContactForm() {
 
       <button
         type="submit"
-        className="font-display-showcase mt-1 w-full rounded-2xl bg-caramel py-5 text-[15px] font-extrabold tracking-[0.15em] text-showcase-cream uppercase shadow-[0_14px_40px_rgba(200,155,88,0.35)] transition-colors duration-500 hover:bg-showcase-navy"
+        className="font-display-showcase mt-1 w-full rounded-xl bg-caramel py-4 text-[13px] font-extrabold tracking-[0.2em] text-showcase-cream uppercase shadow-[0_10px_30px_rgba(200,155,88,0.3)] transition-colors duration-500 hover:bg-showcase-navy"
       >
         Submit
       </button>

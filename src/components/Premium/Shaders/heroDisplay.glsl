@@ -65,10 +65,13 @@ void main () {
   float maskY = smoothstep(0.0, uEdgeFeather, localUv.y) * smoothstep(0.0, uEdgeFeather, 1.0 - localUv.y);
   float photoMask = maskX * maskY;
 
+  // The backdrop used to be desaturated 40% toward gray as well as darkened,
+  // both purely to read as a distinct "ambient frame" behind the true-color
+  // photo. With uBackdropDarken at 0 (see shader.ts) that desaturation alone
+  // stood out as an odd graying — dropped so the backdrop is just the same
+  // photo, barely blurred, indistinguishable from a normal continuation of it.
   vec2 bgUv = vUv * uBgScale + uBgOffset;
-  vec3 backdrop = sampleBlurredBackdrop(clamp(bgUv, 0.0, 1.0));
-  float luma = dot(backdrop, vec3(0.299, 0.587, 0.114));
-  backdrop = mix(backdrop, vec3(luma), 0.4) * (1.0 - uBackdropDarken);
+  vec3 backdrop = sampleBlurredBackdrop(clamp(bgUv, 0.0, 1.0)) * (1.0 - uBackdropDarken);
 
   vec3 color = mix(backdrop, photoColor, photoMask);
   gl_FragColor = vec4(color, 1.0);

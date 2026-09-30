@@ -53,11 +53,20 @@ export const HERO_SHADER_DEFAULTS = {
   /** Soft edge feather (vUv units) where the contained photo meets the
    * blurred backdrop, so the seam doesn't read as a hard-edged sticker. */
   edgeFeather: 0.018,
-  /** UV-space sample radius for the cheap multi-tap backdrop blur. */
-  backdropBlurRadius: 0.028,
-  /** How much the blurred backdrop is darkened/desaturated, purely so it
-   * reads as an ambient frame and never competes with the true-color photo. */
-  backdropDarken: 0.45,
+  /** UV-space sample radius for the cheap multi-tap backdrop blur. Was
+   * 0.028 — soft enough to disguise the repeat when the backdrop was also
+   * darkened, but with `backdropDarken` at 0 that same softness reads as an
+   * obvious, out-of-place blur band in the letterboxed strip. Small enough
+   * here that the backdrop is barely distinguishable from the crisp photo. */
+  backdropBlurRadius: 0.004,
+  /** How much the blurred backdrop is darkened/desaturated. Was 0.45 to read
+   * as an ambient frame that never competes with the true-color photo, but on
+   * a wide viewport (image contain-fit letterboxes top/bottom) that read as
+   * flat black bars rather than an ambient frame — 0 lets the backdrop show
+   * at the photo's own (now barely blurred) color instead, matching the
+   * crisp photo closely enough that the letterboxed strip reads as a normal
+   * continuation of it rather than a distinct band. */
+  backdropDarken: 0,
   /** Amplifies the dye-gradient-derived normal into a visible bend. Lower
    * than the ambient milk layer's (14) so the liquid reads as a soft bulge
    * rather than a hard lens rim. */
