@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
-import { Navbar } from "@/components/Premium/Navbar";
+import { ExperienceNav } from "@/components/Experience/ExperienceNav";
 import { ProductStory } from "@/components/Premium/ProductStory";
+import { PhilosophyReveal } from "@/components/Premium/PhilosophyReveal";
+import { TickerBanner } from "@/components/Premium/TickerBanner";
+import { ProcessSteps } from "@/components/Premium/ProcessSteps";
+import { CommitmentsGrid } from "@/components/Premium/CommitmentsGrid";
+import { TeamSection } from "@/components/Premium/TeamSection";
 
 export const metadata: Metadata = {
   title: "About — Derlings",
@@ -10,9 +15,15 @@ export const metadata: Metadata = {
 export default function About() {
   return (
     <>
-      <Navbar light />
-      <main className="min-h-screen bg-[#f7e6d6]">
+      <ExperienceNav />
+      <main className="min-h-screen bg-showcase-cream">
         <ProductStory image="/about/women.jpeg" />
+        <PhilosophyReveal />
+        <TickerBanner />
+
+        <ProcessSteps />
+        <CommitmentsGrid />
+        <TeamSection />
       </main>
     </>
   );

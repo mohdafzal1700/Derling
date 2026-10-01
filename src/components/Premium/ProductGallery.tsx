@@ -97,14 +97,17 @@ export function ProductGallery() {
   return (
     <section ref={sectionRef} className="relative w-full" style={{ height: `${count * 100}vh` }}>
       <div className="sticky top-0 flex h-screen w-full flex-col items-center justify-center overflow-hidden bg-white">
-        <h2 className="hover-shake absolute inset-x-0 top-28 z-10 cursor-default text-center text-3xl font-black tracking-tight text-[#0a1220] md:text-5xl">
+        <h2
+          className="font-display-showcase hover-shake absolute inset-x-0 top-28 z-30 cursor-default text-center text-3xl tracking-tight text-[#0a1220] uppercase md:text-5xl"
+          style={{ fontWeight: 900 }}
+        >
           Taste the <span className="text-[#c17a3d]">Habit.</span>
         </h2>
 
         <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-[10vw] bg-gradient-to-r from-white to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-[10vw] bg-gradient-to-l from-white to-transparent" />
 
-        <div className="relative h-[680px] w-full max-w-6xl">
+        <div className="relative mt-32 h-[680px] w-full max-w-6xl">
           {cards.map(({ product, offset }) => {
             if (Math.abs(offset) > 1.4) return null;
             const light = isLightColor(product.accent);
@@ -133,7 +136,8 @@ export function ProductGallery() {
                 }}
               >
                 <span
-                  className={`self-start rounded-full px-3 py-1 text-[11px] font-semibold tracking-widest uppercase ${light ? "bg-black/10 text-black/70" : "bg-white/90 text-black/70"}`}
+                  className={`font-display-showcase self-start rounded-full px-3 py-1 text-[11px] tracking-widest uppercase ${light ? "bg-black/10 text-black/70" : "bg-white/90 text-black/70"}`}
+                  style={{ fontWeight: 700 }}
                 >
                   {product.badge}
                 </span>

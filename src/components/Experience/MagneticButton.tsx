@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Link from "next/link";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 
 const MAGNETIC_RADIUS = 70;
@@ -54,9 +55,18 @@ export function MagneticButton({ children, className, href, onClick, disabled = 
     <motion.div ref={ref} style={{ x: springX, y: springY }} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
       <motion.div whileTap={disabled ? undefined : { scale: 0.94 }}>
         {href ? (
-          <a href={href} onClick={onClick} className={className}>
-            {children}
-          </a>
+          // Internal routes go through <Link> so the transition is a client
+          // navigation (and gets prefetched); mailto:/tel:/external stay
+          // plain anchors.
+          href.startsWith("/") ? (
+            <Link href={href} onClick={onClick} className={className}>
+              {children}
+            </Link>
+          ) : (
+            <a href={href} onClick={onClick} className={className}>
+              {children}
+            </a>
+          )
         ) : (
           <button type="button" onClick={onClick} className={className}>
             {children}

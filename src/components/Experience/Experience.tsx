@@ -16,10 +16,21 @@ import { ExperienceHero } from "./ExperienceHero";
 const HERO_IMAGE = "/Gemini_Generated_Image_qjosewqjosewqjos.png";
 
 // WebGL only ever runs on the client, and skipping SSR for it avoids
-// shipping/hydrating a throwaway server render of a <canvas>.
+// shipping/hydrating a throwaway server render of a <canvas>. While the
+// WebGL module itself loads, show the real hero photo (not a flat navy
+// block) so there's never a jarring blank frame between the loader fading
+// out and the canvas taking over.
 const LiquidCanvas = dynamic(
   () => import("@/components/Premium/LiquidCanvas").then((mod) => mod.LiquidCanvas),
-  { ssr: false, loading: () => <div className="absolute inset-0 bg-navy" /> },
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="absolute inset-0 bg-navy bg-cover bg-center"
+        style={{ backgroundImage: `url(${HERO_IMAGE})` }}
+      />
+    ),
+  },
 );
 
 /** navigator.hardwareConcurrency is undefined in some browsers/SSR; treat unknown as capable. */
@@ -68,7 +79,8 @@ export function Experience() {
         initial="hidden"
         animate={loading ? "hidden" : "visible"}
         variants={heroContainerVariants}
-        className="sticky top-0 z-0 h-[100svh] w-full overflow-hidden bg-navy"
+        className="sticky top-0 z-0 h-[100svh] w-full overflow-hidden bg-navy bg-cover bg-center"
+        style={{ backgroundImage: `url(${HERO_IMAGE})` }}
       >
         <ExperienceNav />
 
@@ -82,10 +94,6 @@ export function Experience() {
           {!motionDisabled && <MouseLight />}
           {!motionDisabled && <CursorParticles disabled={lowEnd} />}
         </ParallaxScene>
-
-        {/* Grounds the headline against a bright, busy photo without ever
-            covering the product art itself. */}
-        <div className="absolute inset-x-0 bottom-0 z-[5] h-[55%] bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
 
         <ExperienceHero disabled={motionDisabled} />
       </motion.section>
